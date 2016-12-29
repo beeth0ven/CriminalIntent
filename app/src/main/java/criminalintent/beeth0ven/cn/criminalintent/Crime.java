@@ -1,5 +1,6 @@
 package criminalintent.beeth0ven.cn.criminalintent;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -9,8 +10,11 @@ import java.util.UUID;
 public class Crime {
     public UUID id;
     public String title;
+    public Date date;
+    public boolean isSolved;
 
     public Crime() {
         id = UUID.randomUUID();
+        date = new Date();
     }
 }
