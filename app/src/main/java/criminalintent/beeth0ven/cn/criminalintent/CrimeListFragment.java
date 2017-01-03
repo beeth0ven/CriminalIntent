@@ -26,6 +26,7 @@ public class CrimeListFragment extends Fragment {
 
     private RecyclerView crimeRecyclerView;
     private CrimeAdapter adapter;
+    private int selectedPosition;
 
     @Nullable
     @Override
@@ -37,10 +38,20 @@ public class CrimeListFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
     private void updateUI() {
-        CrimeLab.seedSampleCrimes();
-        adapter = new CrimeAdapter(CrimeLab.crimes);
-        crimeRecyclerView.setAdapter(adapter);
+        if (adapter == null) {
+            CrimeLab.seedSampleCrimes();
+            adapter = new CrimeAdapter(CrimeLab.crimes);
+            crimeRecyclerView.setAdapter(adapter);
+        } else {
+            adapter.notifyItemChanged(selectedPosition);
+        }
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -50,6 +61,7 @@ public class CrimeListFragment extends Fragment {
         private CheckBox checkBox;
 
         private Crime crime;
+        public int position;
 
         public CrimeHolder(View itemView) {
             super(itemView);
@@ -70,6 +82,7 @@ public class CrimeListFragment extends Fragment {
         public void onClick(View v) {
             Intent intent = CrimeActivity.newIntent(getActivity(), crime.id);
             startActivity(intent);
+            selectedPosition = position;
         }
     }
 
@@ -91,6 +104,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onBindViewHolder(CrimeHolder holder, int position) {
             holder.bindCrime(crimes.get(position));
+            holder.position = position;
         }
 
         @Override

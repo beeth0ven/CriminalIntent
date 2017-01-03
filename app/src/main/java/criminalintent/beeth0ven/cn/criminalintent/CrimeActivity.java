@@ -14,12 +14,13 @@ public class CrimeActivity extends SingleFragmentActivity {
 
     public static Intent newIntent(Context pacageContext, UUID id) {
         Intent intent = new Intent(pacageContext, CrimeActivity.class);
-        intent.putExtra("id", id);
+        intent.putExtra("crimeId", id);
         return intent;
     }
 
     @Override
     protected Fragment createFragment() {
-        return new CrimeFragment();
+        UUID crimeId = (UUID) getIntent().getSerializableExtra("crimeId");
+        return CrimeFragment.newInstance(crimeId);
     }
 }
