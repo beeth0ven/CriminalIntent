@@ -75,12 +75,9 @@ public class CrimeFragment extends Fragment {
 
         isSolvedCheckBox = (CheckBox) view.findViewById(R.id.isSolvedCheckBox);
         isSolvedCheckBox.setChecked(crime.isSolved);
-        isSolvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.d("CrimeFragment","onCheckedChanged");
-                crime.isSolved = isChecked;
-            }
+        isSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d("CrimeFragment","onCheckedChanged");
+            crime.isSolved = isChecked;
         });
 
         return view;
