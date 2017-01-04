@@ -80,7 +80,7 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = CrimeActivity.newIntent(getActivity(), crime.id);
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.id);
             startActivity(intent);
             selectedPosition = position;
         }
