@@ -3,6 +3,7 @@ package criminalintent.beeth0ven.cn.criminalintent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -70,8 +71,13 @@ public class CrimeFragment extends Fragment {
 
         dateButton = (Button) view.findViewById(R.id.dateButton);
         dateButton.setText(crime.date.toString());
-        dateButton.setEnabled(false);
         dateButton.setText(DateFormat.format("EEEE, MMM d, yyyy", crime.date));
+        dateButton.setOnClickListener((buttonView) -> {
+            Log.d("CrimeFragment","setOnClickListener");
+            FragmentManager fragmentManager = getFragmentManager();
+            DatePickerFragment datePickerFragment = new DatePickerFragment();
+            datePickerFragment.show(fragmentManager, "DatePickerFragment");
+        });
 
         isSolvedCheckBox = (CheckBox) view.findViewById(R.id.isSolvedCheckBox);
         isSolvedCheckBox.setChecked(crime.isSolved);
