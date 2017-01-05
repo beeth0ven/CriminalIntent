@@ -1,5 +1,7 @@
 package criminalintent.beeth0ven.cn.criminalintent;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,6 +18,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -23,6 +26,8 @@ import java.util.UUID;
  */
 
 public class CrimeFragment extends Fragment {
+
+    private static final int requestDate = 0;
 
     private Crime crime;
     private EditText textField;
@@ -71,11 +76,12 @@ public class CrimeFragment extends Fragment {
 
         dateButton = (Button) view.findViewById(R.id.dateButton);
         dateButton.setText(crime.date.toString());
-        dateButton.setText(DateFormat.format("EEEE, MMM d, yyyy", crime.date));
+        updateDate();
         dateButton.setOnClickListener((buttonView) -> {
             Log.d("CrimeFragment","setOnClickListener");
             FragmentManager fragmentManager = getFragmentManager();
-            DatePickerFragment datePickerFragment = new DatePickerFragment();
+            DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(crime.date);
+            datePickerFragment.setTargetFragment(CrimeFragment.this, requestDate);
             datePickerFragment.show(fragmentManager, "DatePickerFragment");
         });
 
@@ -87,6 +93,28 @@ public class CrimeFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("CrimeFragment","onActivityResult");
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+
+        switch (requestCode) {
+            case requestDate:
+                Date date = (Date) data.getSerializableExtra("date");
+                crime.date = date;
+                updateDate();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void updateDate() {
+        dateButton.setText(DateFormat.format("EEEE, MMM d, yyyy", crime.date));
     }
 }
 
