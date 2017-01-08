@@ -28,10 +28,12 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
 
     private static final int requestDate = 0;
+    private static final int requestTime = 1;
 
     private Crime crime;
     private EditText textField;
     private Button dateButton;
+    private Button timeButton;
     private CheckBox isSolvedCheckBox;
 
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -75,7 +77,6 @@ public class CrimeFragment extends Fragment {
         });
 
         dateButton = (Button) view.findViewById(R.id.dateButton);
-        dateButton.setText(crime.date.toString());
         updateDate();
         dateButton.setOnClickListener((buttonView) -> {
             Log.d("CrimeFragment","setOnClickListener");
@@ -83,6 +84,16 @@ public class CrimeFragment extends Fragment {
             DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(crime.date);
             datePickerFragment.setTargetFragment(CrimeFragment.this, requestDate);
             datePickerFragment.show(fragmentManager, "DatePickerFragment");
+        });
+
+        timeButton = (Button) view.findViewById(R.id.timeButton);
+        updateTime();
+        timeButton.setOnClickListener((buttonView) -> {
+            Log.d("CrimeFragment","setOnClickListener");
+            FragmentManager fragmentManager = getFragmentManager();
+            TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(crime.date);
+            timePickerFragment.setTargetFragment(CrimeFragment.this, requestTime);
+            timePickerFragment.show(fragmentManager, "TimePickerFragment");
         });
 
         isSolvedCheckBox = (CheckBox) view.findViewById(R.id.isSolvedCheckBox);
@@ -108,13 +119,23 @@ public class CrimeFragment extends Fragment {
                 crime.date = date;
                 updateDate();
                 break;
+            case requestTime:
+                Date time = (Date) data.getSerializableExtra("time");
+                crime.date = time;
+                updateTime();
             default:
                 break;
         }
     }
 
     private void updateDate() {
+        Log.d("CrimeFragment","updateDate");
         dateButton.setText(DateFormat.format("EEEE, MMM d, yyyy", crime.date));
+    }
+
+    private void updateTime() {
+        Log.d("CrimeFragment","updateTime");
+        timeButton.setText(DateFormat.format("h:mm a", crime.date));
     }
 }
 
