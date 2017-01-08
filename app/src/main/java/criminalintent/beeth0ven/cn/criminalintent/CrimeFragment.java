@@ -80,10 +80,8 @@ public class CrimeFragment extends Fragment {
         updateDate();
         dateButton.setOnClickListener((buttonView) -> {
             Log.d("CrimeFragment","setOnClickListener");
-            FragmentManager fragmentManager = getFragmentManager();
-            DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(crime.date);
-            datePickerFragment.setTargetFragment(CrimeFragment.this, requestDate);
-            datePickerFragment.show(fragmentManager, "DatePickerFragment");
+            Intent intent = DatePickerActivity.newInstence(getActivity(), crime.date);
+            startActivityForResult(intent, requestDate);
         });
 
         timeButton = (Button) view.findViewById(R.id.timeButton);
