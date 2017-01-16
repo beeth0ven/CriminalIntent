@@ -6,12 +6,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.TextViewCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -29,6 +31,7 @@ public class CrimeListFragment extends Fragment {
     private RecyclerView crimeRecyclerView;
     private CrimeAdapter adapter;
     private int selectedPosition;
+    private boolean isSubtitleShow;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,6 +45,9 @@ public class CrimeListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
         crimeRecyclerView = (RecyclerView) view.findViewById(R.id.crimeRecyclerView);
         crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        if (savedInstanceState != null) {
+            isSubtitleShow = savedInstanceState.getBoolean("isSubtitleShow");
+        }
         updateUI();
         return view;
     }
@@ -50,6 +56,39 @@ public class CrimeListFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_crime_list, menu);
+
+        MenuItem showSubtitleMenuItem = menu.findItem(R.id.showSubtitleMenuItem);
+        int title = isSubtitleShow ? R.string.hide_subtitle : R.string.show_subtitle;
+        showSubtitleMenuItem.setTitle(title);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.newCrimeMenuItem:
+                Crime crime = new Crime();
+                CrimeLab.crimes.add(crime);
+                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.id);
+                startActivity(intent);
+                return true;
+            case  R.id.showSubtitleMenuItem:
+                isSubtitleShow = !isSubtitleShow;
+                getActivity().invalidateOptionsMenu();
+                updateSubtitle();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void updateSubtitle() {
+        int crimeCount = CrimeLab.crimes.size();
+        String subtitle = getString(R.string.subtitle_format, crimeCount);
+
+        if (!isSubtitleShow) { subtitle = null; }
+
+        AppCompatActivity appCompatActivity = (AppCompatActivity) getActivity();
+        appCompatActivity.getSupportActionBar().setSubtitle(subtitle);
     }
 
     @Override
@@ -58,14 +97,20 @@ public class CrimeListFragment extends Fragment {
         updateUI();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isSubtitleShow", isSubtitleShow);
+    }
+
     private void updateUI() {
         if (adapter == null) {
-            CrimeLab.seedSampleCrimes();
             adapter = new CrimeAdapter(CrimeLab.crimes);
             crimeRecyclerView.setAdapter(adapter);
         } else {
             adapter.notifyItemChanged(selectedPosition);
         }
+        updateSubtitle();
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

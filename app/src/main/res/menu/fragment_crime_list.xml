@@ -5,5 +5,10 @@
     <item android:title="@string/new_crime"
           android:id="@+id/newCrimeMenuItem"
           android:icon="@drawable/ic_menu_add"
-          android:showAsAction="ifRoom|withText"/>
+          app:showAsAction="ifRoom|withText"/>
+    <item android:title="@string/show_subtitle"
+          android:id="@+id/showSubtitleMenuItem"
+          android:showAsAction="ifRoom"/>
+
+
 </menu>
