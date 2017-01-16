@@ -19,12 +19,4 @@ public class CrimeLab {
         return null;
     }
 
-    public static void seedSampleCrimes() {
-        for (int i = 0; i < 100; i++) {
-            Crime crime = new Crime();
-            crime.title = "Crime #" + i;
-            crime.isSolved = i % 2 == 0;
-            crimes.add(crime);
-        }
-    }
 }
