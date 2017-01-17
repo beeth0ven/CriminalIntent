@@ -8,7 +8,7 @@
           app:showAsAction="ifRoom|withText"/>
     <item android:title="@string/show_subtitle"
           android:id="@+id/showSubtitleMenuItem"
-          android:showAsAction="ifRoom"/>
+          app:showAsAction="ifRoom"/>
 
 
 </menu>

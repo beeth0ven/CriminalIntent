@@ -19,4 +19,7 @@ public class CrimeLab {
         return null;
     }
 
+    public static void deleteCrimeWithId(UUID id) {
+        crimes.remove(getCrime(id));
+    }
 }
