@@ -29,6 +29,7 @@ dependencies {
     compile 'com.android.support:support-v4:25.1.0'
     compile 'com.android.support:recyclerview-v7:25.1.0'
     compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'io.reactivex:rxjava:1.1.0'
 }
 
 android {
@@ -53,3 +54,4 @@ repositories {
 
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'realm-android'
