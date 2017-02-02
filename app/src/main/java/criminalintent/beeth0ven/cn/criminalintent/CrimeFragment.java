@@ -10,6 +10,7 @@ import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -48,6 +49,7 @@ public class CrimeFragment extends Fragment {
     private CheckBox isSolvedCheckBox;
     private Button reportButton;
     private Button suspectButton;
+    private Button makeCallButton;
 
 
     public static CrimeFragment newInstance(long crimeId) {
@@ -118,10 +120,11 @@ public class CrimeFragment extends Fragment {
 
         reportButton = (Button) view.findViewById(R.id.reportButton);
         reportButton.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, getCirmeReport());
-            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+            Intent intent = ShareCompat.IntentBuilder.from(getActivity())
+                    .setType("text/plain")
+                    .setText(getCirmeReport())
+                    .setSubject(getString(R.string.crime_report_subject))
+                    .getIntent();
             intent = Intent.createChooser(intent, getString(R.string.send_report));
             startActivity(intent);
         });
@@ -136,6 +139,14 @@ public class CrimeFragment extends Fragment {
         if (packageManager.resolveActivity(contactIntent, PackageManager.MATCH_DEFAULT_ONLY) == null) {
             suspectButton.setEnabled(false);
         }
+
+        makeCallButton = (Button) view.findViewById(R.id.makeCallButton);
+        makeCallButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + crime.phoneNumber));
+            startActivity(intent);
+        });
+
+        makeCallButton.setEnabled(crime.phoneNumber != null);
 
         return view;
     }
@@ -176,19 +187,23 @@ public class CrimeFragment extends Fragment {
                 updateTime();
             case requestContact:
                 if (data == null) { break; }
-                Uri contactUri = data.getData();
                 String[] queryFields = new String[] {
-                        ContactsContract.Contacts.DISPLAY_NAME
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER
                 };
 
                 Cursor cursor = getActivity().getContentResolver()
-                        .query(contactUri, queryFields, null, null, null);
+                        .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, queryFields, null, null, null);
 
                 try {
                     if (cursor.getCount() == 0) { return; }
                     cursor.moveToFirst();
-                    Realm.getDefaultInstance().executeTransaction(realm -> crime.suspect = cursor.getString(0));
+                    Realm.getDefaultInstance().executeTransaction(realm -> {
+                                crime.suspect = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                                crime.phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                            });
                     suspectButton.setText(crime.suspect);
+                    makeCallButton.setEnabled(crime.phoneNumber != null);
                 } finally {
                     cursor.close();
                 }

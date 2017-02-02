@@ -17,6 +17,7 @@ public class Crime extends RealmObject {
     public Date date;
     public boolean isSolved;
     public String suspect;
+    public String phoneNumber;
 
     public Crime() {
         id = new Date().getTime();
