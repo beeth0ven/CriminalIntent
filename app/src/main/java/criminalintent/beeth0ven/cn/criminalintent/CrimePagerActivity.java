@@ -24,7 +24,7 @@ public class CrimePagerActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private List<Crime> crimes;
 
-    public static Intent newIntent(Context pacageContext, UUID crimeId) {
+    public static Intent newIntent(Context pacageContext, long crimeId) {
         Intent intent = new Intent(pacageContext, CrimePagerActivity.class);
         intent.putExtra("crimeId", crimeId);
         return intent;
@@ -52,9 +52,9 @@ public class CrimePagerActivity extends AppCompatActivity {
             }
         });
 
-        UUID crimeId = (UUID) getIntent().getSerializableExtra("crimeId");
+        long crimeId = (long) getIntent().getSerializableExtra("crimeId");
         for (int i = 0; i < crimes.size(); i++) {
-            if (crimes.get(i).id.equals(crimeId)) {
+            if (crimes.get(i).id == crimeId) {
                 viewPager.setCurrentItem(i);
                 break;
             }

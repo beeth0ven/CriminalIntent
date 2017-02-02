@@ -4,22 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+
 /**
  * Created by Air on 2017/1/1.
  */
 
 public class CrimeLab {
 
-    public static List<Crime> crimes = new ArrayList<>();
+    public static RealmResults<Crime> crimes = getCrimes();
 
-    public static Crime getCrime(UUID id) {
-        for (Crime crime: crimes) {
-            if (crime.id.equals(id)) { return crime; }
-        }
-        return null;
+    private static RealmResults<Crime> getCrimes() {
+        return Realm.getDefaultInstance()
+                .where(Crime.class)
+                .findAll();
     }
 
-    public static void deleteCrimeWithId(UUID id) {
-        crimes.remove(getCrime(id));
+    public static Crime getCrime(long id) {
+        return Realm.getDefaultInstance()
+                .where(Crime.class)
+                .equalTo("id", id)
+                .findFirst();
+    }
+
+    public static void deleteCrimeWithId(long id) {
+        Realm.getDefaultInstance().executeTransaction(realm -> getCrime(id).deleteFromRealm());
     }
 }

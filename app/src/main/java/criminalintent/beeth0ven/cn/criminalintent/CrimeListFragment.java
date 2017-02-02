@@ -26,6 +26,9 @@ import android.widget.Toast;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+
 /**
  * Created by Air on 2017/1/1.
  */
@@ -91,7 +94,10 @@ public class CrimeListFragment extends Fragment {
 
     private void addCrime() {
         Crime crime = new Crime();
-        CrimeLab.crimes.add(crime);
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.copyToRealm(crime);
+        realm.commitTransaction();
         Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.id);
         startActivity(intent);
     }
@@ -125,7 +131,8 @@ public class CrimeListFragment extends Fragment {
 
     private void updateUI() {
         if (adapter == null) {
-            adapter = new CrimeAdapter(CrimeLab.crimes);
+            RealmResults<Crime> crimes = CrimeLab.crimes;
+            adapter = new CrimeAdapter(crimes);
             crimeRecyclerView.setAdapter(adapter);
         } else {
             adapter.notifyDataSetChanged();
@@ -169,9 +176,9 @@ public class CrimeListFragment extends Fragment {
 
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
 
-        private List<Crime> crimes;
+        private RealmResults<Crime> crimes;
 
-        public CrimeAdapter(List<Crime> crimes) {
+        public CrimeAdapter(RealmResults<Crime> crimes) {
             this.crimes = crimes;
         }
 

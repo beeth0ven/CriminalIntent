@@ -2,7 +2,11 @@ package criminalintent.beeth0ven.cn.criminalintent;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +29,8 @@ import android.widget.EditText;
 import java.util.Date;
 import java.util.UUID;
 
+import io.realm.Realm;
+
 /**
  * Created by Air on 2016/12/28.
  */
@@ -33,14 +39,18 @@ public class CrimeFragment extends Fragment {
 
     private static final int requestDate = 0;
     private static final int requestTime = 1;
+    private static final int requestContact = 2;
 
     private Crime crime;
     private EditText textField;
     private Button dateButton;
     private Button timeButton;
     private CheckBox isSolvedCheckBox;
+    private Button reportButton;
+    private Button suspectButton;
 
-    public static CrimeFragment newInstance(UUID crimeId) {
+
+    public static CrimeFragment newInstance(long crimeId) {
         Bundle params = new Bundle();
         params.putSerializable("crimeId", crimeId);
 
@@ -52,7 +62,7 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UUID crimeId = (UUID) getArguments().getSerializable("crimeId");
+        long crimeId = (long) getArguments().getSerializable("crimeId");
         crime = CrimeLab.getCrime(crimeId);
         setHasOptionsMenu(true);
     }
@@ -72,7 +82,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 Log.d("CrimeFragment","onTextChanged");
-                crime.title = s.toString();
+                Realm.getDefaultInstance().executeTransaction(realm -> crime.title = s.toString());
             }
 
             @Override
@@ -103,8 +113,29 @@ public class CrimeFragment extends Fragment {
         isSolvedCheckBox.setChecked(crime.isSolved);
         isSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.d("CrimeFragment","onCheckedChanged");
-            crime.isSolved = isChecked;
+            Realm.getDefaultInstance().executeTransaction(realm -> crime.isSolved = isChecked);
         });
+
+        reportButton = (Button) view.findViewById(R.id.reportButton);
+        reportButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, getCirmeReport());
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+            intent = Intent.createChooser(intent, getString(R.string.send_report));
+            startActivity(intent);
+        });
+
+        final Intent contactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        suspectButton = (Button) view.findViewById(R.id.suspectButton);
+        suspectButton.setOnClickListener(v -> startActivityForResult(contactIntent, requestContact));
+
+        if (crime.suspect != null) { suspectButton.setText(crime.suspect); }
+
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (packageManager.resolveActivity(contactIntent, PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            suspectButton.setEnabled(false);
+        }
 
         return view;
     }
@@ -136,13 +167,32 @@ public class CrimeFragment extends Fragment {
         switch (requestCode) {
             case requestDate:
                 Date date = (Date) data.getSerializableExtra("date");
-                crime.date = date;
+                Realm.getDefaultInstance().executeTransaction(realm -> crime.date = date);
                 updateDate();
                 break;
             case requestTime:
                 Date time = (Date) data.getSerializableExtra("time");
-                crime.date = time;
+                Realm.getDefaultInstance().executeTransaction(realm -> crime.date = time);
                 updateTime();
+            case requestContact:
+                if (data == null) { break; }
+                Uri contactUri = data.getData();
+                String[] queryFields = new String[] {
+                        ContactsContract.Contacts.DISPLAY_NAME
+                };
+
+                Cursor cursor = getActivity().getContentResolver()
+                        .query(contactUri, queryFields, null, null, null);
+
+                try {
+                    if (cursor.getCount() == 0) { return; }
+                    cursor.moveToFirst();
+                    Realm.getDefaultInstance().executeTransaction(realm -> crime.suspect = cursor.getString(0));
+                    suspectButton.setText(crime.suspect);
+                } finally {
+                    cursor.close();
+                }
+
             default:
                 break;
         }
@@ -156,6 +206,15 @@ public class CrimeFragment extends Fragment {
     private void updateTime() {
         Log.d("CrimeFragment","updateTime");
         timeButton.setText(DateFormat.format("h:mm a", crime.date));
+    }
+
+    private String getCirmeReport() {
+        String solvedString = getString(crime.isSolved ? R.string.crime_report_solved : R.string.crime_report_unsolved);
+        String dateString = DateFormat.format("EEE, MM dd", crime.date).toString();
+        String suspect = crime.suspect == null ?
+                getString(R.string.crime_report_no_suspect) :
+                getString(R.string.crime_report_suspect, crime.suspect);
+        return getString(R.string.crime_report, crime.title, dateString, solvedString, suspect);
     }
 }
 
