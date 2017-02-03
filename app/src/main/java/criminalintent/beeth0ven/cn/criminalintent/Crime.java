@@ -1,5 +1,8 @@
 package criminalintent.beeth0ven.cn.criminalintent;
 
+import android.os.Environment;
+
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -23,4 +26,15 @@ public class Crime extends RealmObject {
         id = new Date().getTime();
         date = new Date();
     }
+
+    public String getImageFilename() {
+        return "IMG_" + String.valueOf(id) + ".jpg";
+    }
+
+    public File getImageFile() {
+        File dir = MyApplication.context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (dir == null) { return null; }
+        return new File(dir, getImageFilename());
+    }
+
 }

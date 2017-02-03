@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,6 +28,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import java.util.Date;
 import java.util.UUID;
@@ -41,6 +45,7 @@ public class CrimeFragment extends Fragment {
     private static final int requestDate = 0;
     private static final int requestTime = 1;
     private static final int requestContact = 2;
+    private static final int requestImage = 3;
 
     private Crime crime;
     private EditText textField;
@@ -50,7 +55,8 @@ public class CrimeFragment extends Fragment {
     private Button reportButton;
     private Button suspectButton;
     private Button makeCallButton;
-
+    private ImageButton imageButton;
+    private ImageView imageView;
 
     public static CrimeFragment newInstance(long crimeId) {
         Bundle params = new Bundle();
@@ -148,6 +154,18 @@ public class CrimeFragment extends Fragment {
 
         makeCallButton.setEnabled(crime.phoneNumber != null);
 
+        imageButton = (ImageButton) view.findViewById(R.id.imageButton);
+        final Intent imageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (crime.getImageFile() != null && imageIntent.resolveActivity(packageManager) != null) {
+            Uri uri = Uri.fromFile(crime.getImageFile());
+            imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        }
+
+        imageButton.setOnClickListener(v -> startActivityForResult(imageIntent, requestImage));
+
+        imageView = (ImageView) view.findViewById(R.id.imageView);
+        updateImageView();
+
         return view;
     }
 
@@ -207,7 +225,8 @@ public class CrimeFragment extends Fragment {
                 } finally {
                     cursor.close();
                 }
-
+            case requestImage:
+                updateImageView();
             default:
                 break;
         }
@@ -221,6 +240,15 @@ public class CrimeFragment extends Fragment {
     private void updateTime() {
         Log.d("CrimeFragment","updateTime");
         timeButton.setText(DateFormat.format("h:mm a", crime.date));
+    }
+
+    private void updateImageView() {
+        if (crime.getImageFile() == null || !crime.getImageFile().exists()) {
+            imageView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(crime.getImageFile().getPath(), getActivity());
+            imageView.setImageBitmap(bitmap);
+        }
     }
 
     private String getCirmeReport() {

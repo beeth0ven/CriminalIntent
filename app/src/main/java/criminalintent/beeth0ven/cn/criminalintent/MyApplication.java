@@ -1,6 +1,7 @@
 package criminalintent.beeth0ven.cn.criminalintent;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import io.realm.Realm;
@@ -12,13 +13,17 @@ import io.realm.RealmConfiguration;
 
 public class MyApplication extends Application {
 
+    public static Context context;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        MyApplication.context = this;
+
         Realm.init(this);
         Realm.setDefaultConfiguration(new RealmConfiguration.Builder()
                 .deleteRealmIfMigrationNeeded()
                 .build());
-        Log.d("MyApplication", "path: " + Realm.getDefaultInstance().getPath());
     }
 }
