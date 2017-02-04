@@ -56,7 +56,7 @@ public class CrimeFragment extends Fragment {
     private Button suspectButton;
     private Button makeCallButton;
     private ImageButton imageButton;
-    private ImageView imageView;
+    private ImageButton imageThumbnailButton;
 
     public static CrimeFragment newInstance(long crimeId) {
         Bundle params = new Bundle();
@@ -163,8 +163,16 @@ public class CrimeFragment extends Fragment {
 
         imageButton.setOnClickListener(v -> startActivityForResult(imageIntent, requestImage));
 
-        imageView = (ImageView) view.findViewById(R.id.imageView);
-        updateImageView();
+        imageThumbnailButton = (ImageButton) view.findViewById(R.id.imageThumbnailButton);
+        imageThumbnailButton.setOnClickListener(a -> {
+            Intent intent = ImageActivity.newInstanse(getActivity(), crime.getImageFile().getPath());
+            startActivity(intent);
+        });
+
+        view.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            Log.d("CrimeFragment","didLayoutSubviews");
+            updateImageView();
+        });
 
         return view;
     }
@@ -244,10 +252,16 @@ public class CrimeFragment extends Fragment {
 
     private void updateImageView() {
         if (crime.getImageFile() == null || !crime.getImageFile().exists()) {
-            imageView.setImageDrawable(null);
+            imageThumbnailButton.setImageDrawable(null);
+            imageThumbnailButton.setEnabled(false);
         } else {
-            Bitmap bitmap = PictureUtils.getScaledBitmap(crime.getImageFile().getPath(), getActivity());
-            imageView.setImageBitmap(bitmap);
+            Bitmap bitmap = PictureUtils.getScaledBitmap(
+                    crime.getImageFile().getPath(),
+                    imageThumbnailButton.getWidth(),
+                    imageThumbnailButton.getHeight()
+            );
+            imageThumbnailButton.setImageBitmap(bitmap);
+            imageThumbnailButton.setEnabled(true);
         }
     }
 
