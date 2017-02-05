@@ -111,10 +111,7 @@ public class CrimeFragment extends Fragment {
         updateTime();
         timeButton.setOnClickListener((buttonView) -> {
             Log.d("CrimeFragment","setOnClickListener");
-            FragmentManager fragmentManager = getFragmentManager();
-            TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(crime.date);
-            timePickerFragment.setTargetFragment(CrimeFragment.this, requestTime);
-            timePickerFragment.show(fragmentManager, "TimePickerFragment");
+            TimePickerFragment.showFrom(CrimeFragment.this, requestTime, crime.date);
         });
 
         isSolvedCheckBox = (CheckBox) view.findViewById(R.id.isSolvedCheckBox);

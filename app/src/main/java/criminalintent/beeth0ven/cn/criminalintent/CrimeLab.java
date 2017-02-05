@@ -14,13 +14,9 @@ import io.realm.RealmResults;
 
 public class CrimeLab {
 
-    public static RealmResults<Crime> crimes = getCrimes();
-
-    private static RealmResults<Crime> getCrimes() {
-        return Realm.getDefaultInstance()
-                .where(Crime.class)
-                .findAll();
-    }
+    public static RealmResults<Crime> crimes = Realm.getDefaultInstance()
+            .where(Crime.class)
+            .findAll();
 
     public static Crime getCrime(long id) {
         return Realm.getDefaultInstance()

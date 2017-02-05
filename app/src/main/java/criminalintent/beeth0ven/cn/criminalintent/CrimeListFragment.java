@@ -82,7 +82,7 @@ public class CrimeListFragment extends Fragment {
             case R.id.newCrimeMenuItem:
                 addCrime();
                 return true;
-            case  R.id.showSubtitleMenuItem:
+            case R.id.showSubtitleMenuItem:
                 isSubtitleShow = !isSubtitleShow;
                 getActivity().invalidateOptionsMenu();
                 updateSubtitle();
