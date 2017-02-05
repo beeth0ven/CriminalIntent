@@ -136,12 +136,11 @@ public class CrimeListFragment extends Fragment {
             crimeRecyclerView.setAdapter(adapter);
             crimes.addChangeListener((updatedCrimes) -> {
                 adapter.notifyDataSetChanged();
-                updateSubtitle();
                 showEmptyViewIfNeeded();
             });
+            updateSubtitle();
+            showEmptyViewIfNeeded();
         }
-        updateSubtitle();
-        showEmptyViewIfNeeded();
     }
 
     private void showCrime(Crime crime) {
