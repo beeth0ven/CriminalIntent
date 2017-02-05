@@ -26,6 +26,12 @@
             android:id="@+id/dateButton"
             android:layout_weight="1" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/timeButton"
+            android:layout_weight="1" />
+
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

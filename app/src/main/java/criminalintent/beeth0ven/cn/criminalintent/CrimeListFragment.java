@@ -98,8 +98,8 @@ public class CrimeListFragment extends Fragment {
         realm.beginTransaction();
         realm.copyToRealm(crime);
         realm.commitTransaction();
-        Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.id);
-        startActivity(intent);
+        updateUI();
+        showCrime(crime);
     }
 
     private void updateSubtitle() {
@@ -129,16 +129,32 @@ public class CrimeListFragment extends Fragment {
         outState.putBoolean("isSubtitleShow", isSubtitleShow);
     }
 
-    private void updateUI() {
+    public void updateUI() {
         if (adapter == null) {
             RealmResults<Crime> crimes = CrimeLab.crimes;
             adapter = new CrimeAdapter(crimes);
             crimeRecyclerView.setAdapter(adapter);
-        } else {
-            adapter.notifyDataSetChanged();
+            crimes.addChangeListener((updatedCrimes) -> {
+                adapter.notifyDataSetChanged();
+                updateSubtitle();
+                showEmptyViewIfNeeded();
+            });
         }
         updateSubtitle();
         showEmptyViewIfNeeded();
+    }
+
+    private void showCrime(Crime crime) {
+        if (getActivity().findViewById(R.id.detail_fragment_container) == null) {
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.id);
+            getActivity().startActivity(intent);
+        } else {
+            Fragment crimeFragment = CrimeFragment.newInstance(crime.id);
+
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_fragment_container, crimeFragment)
+                    .commit();
+        }
     }
 
 
@@ -168,8 +184,7 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.id);
-            startActivity(intent);
+            showCrime(crime);
             selectedPosition = position;
         }
     }
